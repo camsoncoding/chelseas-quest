@@ -76,6 +76,7 @@ canvas#c{display:block;image-rendering:pixelated;image-rendering:crisp-edges;bor
 
 
 
+
 var spkEl=document.getElementById('spk');
 for(var i=0;i<12;i++){var d=document.createElement('div');d.className='sd';spkEl.appendChild(d);}
 var cv=document.getElementById('c'),cx=cv.getContext('2d');
@@ -373,88 +374,132 @@ function startBuffalo(onComplete){
   BUFF.active=true;BUFF.t=0;BUFF.done=false;BUFF.gandalfAnim=0;BUFF.onComplete=onComplete;
 }
 function drawBuffalo(){
-  var bgImg = IMGS.imgBuffaloMap;
-  var carImg = IMGS.imgCar;
-  // Pittsburgh canvas coords: (39, 110), Buffalo dest: (29, 38)
-  var PIT  = {x:39, y:110};
-  var DEST = {x:29, y:38};
+  // Canvas-drawn map - no image loading issues
+  var PIT  = {x:62, y:176};
+  var DEST = {x:48, y:54};
+  var pct  = Math.min(1, BUFF.t / 220);
 
-  if(bgImg&&(bgImg._ready||bgImg.complete))try{cx.drawImage(bgImg,0,0,W,H);}catch(e){cx.fillStyle='#C8A850';cx.fillRect(0,0,W,H);} else{cx.fillStyle='#C8A850';cx.fillRect(0,0,W,H);}
+  // Sky/background
+  cx.fillStyle='#1A2A3A'; cx.fillRect(0,0,W,H);
 
-  var pct = Math.min(1, BUFF.t / 200);
+  // Parchment map area
+  cx.fillStyle='#C8B878'; cx.fillRect(14,14,W-28,H-28);
+  cx.fillStyle='#B8A860'; cx.fillRect(16,16,W-32,H-32);
 
-  // Draw dotted route line (already traveled portion)
-  cx.strokeStyle = 'rgba(255,80,80,0.7)';
-  cx.lineWidth = 2;
-  cx.setLineDash([3,3]);
+  // Map border
+  cx.strokeStyle='#8B6914'; cx.lineWidth=3;
+  cx.strokeRect(14,14,W-28,H-28);
+
+  // Lake Erie (top)
+  cx.fillStyle='#4A7AAA';
+  cx.beginPath();
+  cx.moveTo(20,20); cx.lineTo(200,20); cx.lineTo(220,50);
+  cx.lineTo(180,70); cx.lineTo(100,75); cx.lineTo(40,60); cx.closePath();
+  cx.fill();
+  cx.fillStyle='#6A9ACC';
+  cx.fillRect(22,22,160,12);
+
+  // NY state (upper right)
+  cx.fillStyle='#C4A84A';
+  cx.beginPath();
+  cx.moveTo(130,55); cx.lineTo(310,55); cx.lineTo(320,80);
+  cx.lineTo(300,175); cx.lineTo(130,175); cx.closePath();
+  cx.fill();
+  cx.strokeStyle='#8B6914'; cx.lineWidth=1.5;
+  cx.stroke();
+
+  // PA state (lower left)
+  cx.fillStyle='#B89840';
+  cx.beginPath();
+  cx.moveTo(20,100); cx.lineTo(130,100); cx.lineTo(130,175);
+  cx.lineTo(300,175); cx.lineTo(290,270); cx.lineTo(20,270); cx.closePath();
+  cx.fill();
+  cx.strokeStyle='#8B6914'; cx.lineWidth=1.5;
+  cx.stroke();
+
+  // State labels
+  cx.fillStyle='#5A3A08'; cx.font="bold 10px 'Press Start 2P',monospace";
+  cx.textAlign='center';
+  cx.fillText('PA', 140, 230);
+  cx.fillText('NY', 220, 130);
+
+  // Lake Erie label
+  cx.fillStyle='#FFFFFF'; cx.font="7px 'Press Start 2P',monospace";
+  cx.fillText('LAKE ERIE', 110, 42);
+
+  // Dotted route line (traveled portion)
+  cx.strokeStyle='rgba(200,50,50,0.8)';
+  cx.lineWidth=2; cx.setLineDash([4,4]);
   cx.beginPath();
   cx.moveTo(PIT.x, PIT.y);
-  cx.lineTo(PIT.x + (DEST.x - PIT.x)*pct, PIT.y + (DEST.y - PIT.y)*pct);
+  cx.lineTo(PIT.x+(DEST.x-PIT.x)*pct, PIT.y+(DEST.y-PIT.y)*pct);
   cx.stroke();
   cx.setLineDash([]);
 
-  // Pulsing dot at Pittsburgh start
-  cx.fillStyle = '#FFD070';
-  cx.beginPath();
-  cx.arc(PIT.x, PIT.y, 4, 0, Math.PI*2);
-  cx.fill();
+  // Pittsburgh dot + label
+  cx.fillStyle='#FFD070';
+  cx.beginPath(); cx.arc(PIT.x,PIT.y,6,0,Math.PI*2); cx.fill();
+  cx.fillStyle='#2A1A00'; cx.font="6px 'Press Start 2P',monospace";
+  cx.textAlign='left';
+  cx.fillText('Pittsburgh',PIT.x+10,PIT.y+3);
 
-  // Car traveling along route
-  var carX = PIT.x + (DEST.x - PIT.x)*pct;
-  var carY = PIT.y + (DEST.y - PIT.y)*pct;
-  try{if(carImg)cx.drawImage(carImg,carX-16,carY-22,32,44);}catch(e){cx.fillStyle='#CC4400';cx.fillRect(carX-8,carY-5,16,10);}
+  // Car
+  var carX=PIT.x+(DEST.x-PIT.x)*pct;
+  var carY=PIT.y+(DEST.y-PIT.y)*pct;
+  cx.fillStyle='#CC4400'; cx.fillRect(carX-7,carY-4,14,8);
+  cx.fillStyle='#FF6622'; cx.fillRect(carX-5,carY-6,10,3);
+  cx.fillStyle='#222';
+  cx.beginPath(); cx.arc(carX-4,carY+4,3,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.arc(carX+4,carY+4,3,0,Math.PI*2); cx.fill();
 
   BUFF.t++;
 
-  // Arrived
-  if(BUFF.t > 220){
+  if(BUFF.t > 240){
     BUFF.gandalfAnim++;
-    // Pulsing dot at Buffalo
-    var pulse = Math.abs(Math.sin(BUFF.gandalfAnim * 0.1)) * 3 + 3;
-    cx.fillStyle = '#44FF88';
-    cx.beginPath(); cx.arc(DEST.x, DEST.y, pulse, 0, Math.PI*2); cx.fill();
-    cx.fillStyle = '#44FF88';
-    cx.font = "6px 'Press Start 2P',monospace"; cx.textAlign='center';
-    cx.fillText('ARRIVED!', DEST.x + 30, DEST.y - 10);
 
-    // Gandalf box
-    if(BUFF.gandalfAnim > 20) {
-      var bx = W/2 - 90, by = H - 115;
-      cx.fillStyle = 'rgba(0,0,0,0.88)'; cx.fillRect(bx, by, 180, 100);
-      cx.strokeStyle = '#44FF88'; cx.lineWidth = 1; cx.strokeRect(bx, by, 180, 100);
-      cx.fillStyle = '#44FF88';
-      cx.font = "7px 'Press Start 2P',monospace"; cx.textAlign='center';
-      cx.fillText('BUFFALO, NY', W/2, by+16);
-      cx.fillStyle = '#FFFFFF';
-      cx.font = "6px 'Press Start 2P',monospace";
-      cx.fillText('Meet Gandalf!', W/2, by+32);
-      var ganImg = IMGS.imgGandalf;
+    // Buffalo dot
+    var pulse=Math.abs(Math.sin(BUFF.gandalfAnim*0.1))*3+4;
+    cx.fillStyle='#44FF88';
+    cx.beginPath(); cx.arc(DEST.x,DEST.y,pulse,0,Math.PI*2); cx.fill();
+    cx.fillStyle='#2A1A00'; cx.font="6px 'Press Start 2P',monospace";
+    cx.textAlign='left';
+    cx.fillText('Buffalo',DEST.x+10,DEST.y+3);
+
+    if(BUFF.gandalfAnim > 20){
+      var bx=W/2-90, by=H-120;
+      cx.fillStyle='rgba(0,0,0,0.9)'; cx.fillRect(bx,by,180,100);
+      cx.strokeStyle='#44FF88'; cx.lineWidth=1; cx.strokeRect(bx,by,180,100);
+      cx.fillStyle='#44FF88'; cx.font="7px 'Press Start 2P',monospace";
+      cx.textAlign='center';
+      cx.fillText('BUFFALO, NY',W/2,by+16);
+      cx.fillStyle='#FFFFFF'; cx.font="6px 'Press Start 2P',monospace";
+      cx.fillText('Meet Gandalf!',W/2,by+32);
+      var ganImg=IMGS.imgGandalf;
       try{if(ganImg)cx.drawImage(ganImg,W/2-17,by+38,34,28);}catch(e){}
-      if(Math.floor(BUFF.gandalfAnim/20)%2===0) {
+      if(Math.floor(BUFF.gandalfAnim/20)%2===0){
         cx.fillStyle='#FFD070'; cx.font="8px 'Press Start 2P',monospace";
-        cx.fillText('WOOF!', W/2+28, by+55);
+        cx.fillText('WOOF!',W/2+28,by+55);
       }
-      if(BUFF.gandalfAnim > 80) {
-        BUFF.done = true;
-        if(Math.floor(frame/28)%2===0) {
+      if(BUFF.gandalfAnim>80){
+        BUFF.done=true;
+        if(Math.floor(frame/28)%2===0){
           cx.fillStyle='rgba(0,0,0,0.7)'; cx.fillRect(0,H-18,W,18);
           cx.fillStyle='#FFD070'; cx.font="7px 'Press Start 2P',monospace";
-          cx.textAlign='center'; cx.fillText('A: CONTINUE', W/2, H-4);
+          cx.textAlign='center'; cx.fillText('A: CONTINUE',W/2,H-4);
         }
       }
     }
   } else {
-    // Traveling
     cx.fillStyle='rgba(0,0,0,0.6)'; cx.fillRect(0,H-18,W,18);
     cx.fillStyle='#AAAAFF'; cx.font="6px 'Press Start 2P',monospace";
     cx.textAlign='center';
-    cx.fillText('Road trip to Buffalo...', W/2, H-4);
+    cx.fillText('Road trip to Buffalo...',W/2,H-4);
   }
 
-  // Chapter title
-  cx.fillStyle='rgba(0,0,0,0.7)'; cx.fillRect(0,0,W,18);
+  // Title
+  cx.fillStyle='rgba(0,0,0,0.75)'; cx.fillRect(0,0,W,18);
   cx.fillStyle='#FF88CC'; cx.font="6px 'Press Start 2P',monospace";
-  cx.textAlign='center'; cx.fillText('CHAPTER 2: HOME BASE', W/2, 13);
+  cx.textAlign='center'; cx.fillText('CHAPTER 2: HOME BASE',W/2,13);
 }
 
 function drawRoom(){
@@ -582,6 +627,7 @@ function loop(){
   requestAnimationFrame(loop);
 }
 loop();
+
 
 
 
