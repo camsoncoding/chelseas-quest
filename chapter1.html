@@ -947,7 +947,7 @@ function drawChapterDone(){
   var hx=W/2|0,hy=H/2+10;
   cx.fillStyle='#FF5599';cx.fillRect(hx-3,hy,2,2);cx.fillRect(hx+1,hy,2,2);cx.fillRect(hx-3,hy+2,7,2);cx.fillStyle='#CC1144';cx.fillRect(hx-3,hy+4,7,2);cx.fillRect(hx-2,hy+6,5,1);cx.fillRect(hx-1,hy+7,3,1);D(hx,hy+8,'#AA0033');
   T('Score: '+K.score+'/'+K.total+' on lyrics!',W/2,H/2+34,'#AAAAFF',6);
-  if(Math.floor(frame/30)%2===0) T('A: CONTINUE TO CH.2',W/2,H/2+54,'#88FF88',6);
+  if(Math.floor(frame/30)%2===0) T('A: CONTINUE',W/2,H/2+54,'#88FF88',6);
 }
 
 // ── MAIN LOOP ──
@@ -987,7 +987,7 @@ function loop(){
         if(!K.active&&scene!=='chapter_done') scene='chapter_done';
       }
     }
-    else if(scene==='chapter_done'){}
+    else if(scene==='chapter_done'){ window.location.href='interlude.html'; }
     aF=false;
   }
   if(bF) bF=false;
