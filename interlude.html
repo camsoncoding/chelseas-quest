@@ -90,16 +90,11 @@ var fadeAlpha=1.0;
 var fadingIn=true;
 var aF=false;
 
-// Prevent image selection on dpad
-var dpEl=document.getElementById('dp');
-if(dpEl){
+// Prevent image selection on dpad directional tiles only
+document.querySelectorAll('.dpH,.dpV,.dpC').forEach(function(el){
   ['touchstart','touchmove','touchend'].forEach(function(ev){
-    dpEl.addEventListener(ev,function(e){e.preventDefault();},{passive:false});
+    el.addEventListener(ev,function(e){e.preventDefault();},{passive:false});
   });
-}
-// Also prevent on all buttons
-document.querySelectorAll('.bA,.bB,.sb,.dpH,.dpV').forEach(function(el){
-  el.addEventListener('touchstart',function(e){e.preventDefault();},{passive:false});
 });
 document.addEventListener('keydown',function(e){
   if(['z','Z','Enter',' '].indexOf(e.key)>=0){aF=true;e.preventDefault();}

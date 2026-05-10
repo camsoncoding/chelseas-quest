@@ -86,16 +86,11 @@ var imgs={};
 // Input
 var K={u:0,d:0,l:0,r:0};
 var aF=false,bF=false,lH=false,rH=false,uH=false,dH=false;
-// Prevent image selection on dpad
-var dpEl=document.getElementById('dp');
-if(dpEl){
+// Prevent image selection on dpad directional tiles only
+document.querySelectorAll('.dpH,.dpV,.dpC').forEach(function(el){
   ['touchstart','touchmove','touchend'].forEach(function(ev){
-    dpEl.addEventListener(ev,function(e){e.preventDefault();},{passive:false});
+    el.addEventListener(ev,function(e){e.preventDefault();},{passive:false});
   });
-}
-// Also prevent on all buttons
-document.querySelectorAll('.bA,.bB,.sb,.dpH,.dpV').forEach(function(el){
-  el.addEventListener('touchstart',function(e){e.preventDefault();},{passive:false});
 });
 document.body.addEventListener('touchstart',function _unlock(){
   initAudio();
