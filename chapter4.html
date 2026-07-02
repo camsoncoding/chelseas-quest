@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Chelsea's Quest - Chapter 4: The Lake</title>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{min-height:100vh;background:radial-gradient(ellipse at center,#1A1030,#060610);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Press Start 2P',monospace;gap:12px}
@@ -75,14 +75,27 @@ var IMGS={};
 // ===== EDITABLE TEXT (loaded from files at runtime) =====
 // The game tries to read memories.txt (one memory per line) and letter.txt.
 // If those files can't be loaded, these built-in placeholders are used instead.
-var MEMORIES=[
-  "Our first date at the coffee shop.",
-  "You singing Crazy in Love.",
-  "The drive to Buffalo with Gandalf.",
-  "Saying I do at Belhurst Castle.",
-  "Quiet mornings on Shirley Drive.",
-  "Every summer here at the lake."
-];
+// A memory = {photo:'file.jpg'|null, caption:'...'}. Fishing shows it as a polaroid.
+function parseMemories(lines){
+  return lines.filter(function(l){return l&&l.charAt(0)!=='#';}).map(function(l){
+    var i=l.indexOf('|');
+    if(i>=0)return {photo:l.slice(0,i).trim()||null,caption:l.slice(i+1).trim()};
+    return {photo:null,caption:l.trim()};
+  });
+}
+var PHOTO_IMGS={};
+function preloadPhotos(mems){
+  mems.forEach(function(m){
+    if(m.photo&&!PHOTO_IMGS[m.photo]){var im=new Image();im.src='assets/photos/'+m.photo;PHOTO_IMGS[m.photo]=im;}
+  });
+}
+var MEMORIES=parseMemories([
+  "lake1.jpg | Sunset over the water",
+  "lake2.jpg | Our happy place",
+  "lake3.jpg | Evenings on the dock",
+  "lake4.jpg | Lake Wesauking, together"
+]);
+preloadPhotos(MEMORIES);
 var LETTER_TEXT=
 "My dearest Chelsea,\n\n"+
 "[This is placeholder text. Edit letter.txt to write the real letter in your own words.]\n\n"+
@@ -96,7 +109,7 @@ function loadText(file,onLines,onText){
     if(onText){if(t.trim().length)onText(t);}
   }).catch(function(){});
 }
-loadText('memories.txt',function(ls){MEMORIES=ls;},null);
+loadText('memories.txt',function(ls){MEMORIES=parseMemories(ls);preloadPhotos(MEMORIES);},null);
 loadText('letter.txt',null,function(t){LETTER_TEXT=t;letterPages=null;});
 
 // ===== INPUT =====
@@ -348,6 +361,30 @@ function drawLake(){
   }
 }
 
+function drawCover(im,x,y,w,h){ // scale image to cover box, center-crop
+  var iw=im.naturalWidth,ih=im.naturalHeight;if(!iw||!ih)return;
+  var br=w/h,ir=iw/ih,sw,sh,sx,sy;
+  if(ir>br){sh=ih;sw=ih*br;sx=(iw-sw)/2;sy=0;}else{sw=iw;sh=iw/br;sx=0;sy=(ih-sh)/2;}
+  try{cx.drawImage(im,sx,sy,sw,sh,x,y,w,h);}catch(e){}
+}
+function drawPolaroid(m){
+  var pw=152,ph=184,px=(W-pw)/2,py=46;
+  cx.save();
+  cx.translate(W/2,py+ph/2);cx.rotate(-0.045);cx.translate(-W/2,-(py+ph/2));
+  cx.fillStyle='rgba(0,0,0,0.4)';cx.fillRect(px+5,py+7,pw,ph);   // shadow
+  cx.fillStyle='#F8F5EC';cx.fillRect(px,py,pw,ph);               // white frame
+  var ix=px+12,iy=py+12,iw=pw-24,ih=118;
+  cx.fillStyle='#20242C';cx.fillRect(ix,iy,iw,ih);               // photo well
+  var im=m.photo?PHOTO_IMGS[m.photo]:null;
+  if(im&&im.complete&&im.naturalWidth){drawCover(im,ix,iy,iw,ih);}
+  else{cx.font="14px 'Caveat',cursive";cx.fillStyle='#9AA';cx.textAlign='center';_ff='';cx.fillText(m.photo?'developing...':'',ix+iw/2,iy+ih/2);}
+  // handwritten caption
+  cx.font="17px 'Caveat',cursive";cx.fillStyle='#3A3226';cx.textAlign='center';_ff='';
+  var cap=wrapText(m.caption||'',"17px 'Caveat',cursive",pw-20);
+  for(var k=0;k<cap.length&&k<2;k++){cx.fillText(cap[k],W/2,iy+ih+24+k*17);}
+  cx.restore();
+}
+
 function drawFishing(){
   drawLake(); // keep the scene behind
   // dim
@@ -367,13 +404,10 @@ function drawFishing(){
     T('!',bx,by-12,f?'#FFD23A':'#FF5050',12);
     R(0,HUD+4,W,14,'rgba(120,20,20,0.85)');T('PRESS A NOW!',W/2,HUD+14,'#FFE0E0',7);
   }else if(FISH.phase==='caught'){
-    R(24,60,W-48,150,'rgba(10,14,30,0.95)');R(24,60,W-48,2,'#6655FF');R(24,208,W-48,2,'#6655FF');
-    T('YOU REELED IN',W/2,86,'#FFD070',8);
-    T('A MEMORY',W/2,102,'#FFD070',8);
-    // wrapped memory text
-    var lines=wrapText(FISH.memory,"7px 'Press Start 2P',monospace",W-72);
-    for(var i=0;i<lines.length&&i<6;i++){T(lines[i],W/2,128+i*14,'#EEEEFF',7);}
-    if(Math.floor(frame/30)%2===0)T('A: CONTINUE',W/2,198,'#88FF88',6);
+    R(0,HUD,W,H-HUD,'rgba(6,8,20,0.7)');
+    T('YOU REELED IN A MEMORY',W/2,34,'#FFD070',6);
+    drawPolaroid(FISH.memory||{caption:''});
+    if(Math.floor(frame/30)%2===0)T('A: CONTINUE',W/2,H-12,'#88FF88',6);
   }else if(FISH.phase==='miss'){
     R(24,90,W-48,90,'rgba(10,14,30,0.95)');R(24,90,W-48,2,'#6655FF');
     T('IT GOT AWAY!',W/2,124,'#FFD070',8);
