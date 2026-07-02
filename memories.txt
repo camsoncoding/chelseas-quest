@@ -1,11 +1,11 @@
-# Each line is one memory shown as a POLAROID when Chelsea catches a fish.
-# Format:   photofile.jpg | caption
-#   - Put the photo in the  assets/photos/  folder, then name it here.
-#   - Keep captions short (they're handwritten under the photo).
-#   - A line with no "|" just shows a written note (no photo).
-#   - Lines starting with # are ignored.
+# One photo per line = one polaroid Chelsea can reel in (shown in random order).
+# Put the image in the  assets/photos/  folder and list its filename here.
+# Lines starting with # are ignored.
 #
-lake1.jpg | Sunset over the water
-lake2.jpg | Our happy place
-lake3.jpg | Evenings on the dock
-lake4.jpg | Lake Wesauking, together
+fish1.jpg
+fish2.jpg
+fish3.jpg
+fish4.jpg
+fish5.jpg
+fish6.jpg
+fish7.jpg
