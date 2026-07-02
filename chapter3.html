@@ -170,8 +170,7 @@ var INTERIOR_START={tx:8,ty:16};
 var STAIRS={tx:7,ty:10};
 var JOSH={tx:14,ty:6,name:'JOSH'};
 var CATS=[{tx:13,ty:2,name:'BINX'},{tx:11,ty:2,name:'ARCHIMEDES'}];
-var GANDALF={tx:13,ty:16,name:'GANDALF'};
-var CANDLE={tx:10,ty:4,name:'CANDLE'};
+var GANDALF={tx:14,ty:12,name:'GANDALF'};
 
 // Player + state
 var P={px:0,py:0,tx:0,ty:0,dir:2,moving:false,tpx:0,tpy:0,delay:0,step:0};
@@ -270,14 +269,6 @@ function doInteract(){
       showDialogue('GANDALF',[['Woof!']]);
       return;
     }
-    if(nearTile(CANDLE)){
-      showDialogue('IN MEMORY',[
-        ['A candle for','Laurie Ludwig,'],
-        ["Chelsea's mom.",'Forever loved.'],
-        ['Her light still','fills this home.']
-      ]);
-      return;
-    }
     for(var i=0;i<CATS.length;i++){
       if(nearTile(CATS[i])){
         showDialogue(CATS[i].name,[['Meow.']]);
@@ -326,30 +317,8 @@ function drawExterior(){
   if(nearTile(EXTERIOR_DOOR)&&!DLG.on&&fadeTarget===0)drawHint('A: GO INSIDE');
 }
 
-function drawCandle(){
-  var x=CANDLE.tx*TS, y=HUD+CANDLE.ty*TS;
-  var fl=(frame%14<7)?0:1;              // flame flicker
-  // soft glow
-  cx.fillStyle='rgba(255,205,90,0.10)';
-  cx.beginPath();cx.arc(x+8,y+6,13,0,Math.PI*2);cx.fill();
-  // holder
-  R(x+3,y+13,10,4,'#7A4A22');
-  R(x+3,y+13,10,1,'#9A6A3A');
-  // candle body
-  R(x+5,y+4,6,10,'#F4ECD8');
-  R(x+5,y+4,2,10,'#FFF8E8');
-  // wick
-  R(x+7,y+2,1,2,'#3A2A1A');
-  // flame
-  cx.fillStyle='#FFD23A';
-  cx.beginPath();cx.ellipse(x+7.5,y-1+fl,2.3,3.6,0,0,Math.PI*2);cx.fill();
-  cx.fillStyle='#FF8A1E';
-  cx.beginPath();cx.ellipse(x+7.5,y+fl,1.1,2.1,0,0,Math.PI*2);cx.fill();
-}
-
 function drawInterior(){
   drawImg(IMGS.imgInterior,0,HUD,W,H-HUD);
-  drawCandle();
   for(var i=0;i<CATS.length;i++){drawNPC(IMGS.imgBinx,CATS[i],16,24);}
   drawNPC(IMGS.imgGandalf,GANDALF,22,18);
   drawNPC(IMGS.imgJoshDown,JOSH,29,40);
@@ -359,7 +328,6 @@ function drawInterior(){
     if(nearTile(STAIRS))drawHint('A: GO UPSTAIRS');
     else if(nearTile(JOSH))drawHint('A: TALK TO JOSH');
     else if(nearTile(GANDALF))drawHint('A: PET GANDALF');
-    else if(nearTile(CANDLE))drawHint('A: REMEMBER');
     else for(var j=0;j<CATS.length;j++){if(nearTile(CATS[j])){drawHint('A: PET '+CATS[j].name);break;}}
   }
 }
@@ -374,8 +342,8 @@ function drawTitle(){
 
 function drawDone(){
   R(0,0,W,H,'#081826');
-  T('LATER THAT',W/2,H/2-58,'#EEEEFF',7);
-  T('SUMMER...',W/2,H/2-40,'#EEEEFF',7);
+  T('A FEW',W/2,H/2-58,'#EEEEFF',7);
+  T('YEARS LATER...',W/2,H/2-40,'#EEEEFF',7);
   T('LAKE',W/2,H/2-6,'#88CFEF',11);
   T('WESAUKING',W/2,H/2+16,'#88CFEF',10);
   if(Math.floor(frame/30)%2===0)T("A: LET'S GO",W/2,H/2+54,'#88FF88',6);

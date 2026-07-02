@@ -287,7 +287,7 @@ function doInteract(){
   if(scene==='fishing'){fishInteract();return;}
   if(scene==='letter'){
     if(letterPages&&letterPage<letterPages.length-1){letterPage++;}
-    else{startFadeOut(function(){scene='done';startFadeIn();});}
+    else{startFadeOut(function(){scene='lake';startFadeIn();});} // back to the lake to keep fishing
     return;
   }
   if(scene==='lake'){
